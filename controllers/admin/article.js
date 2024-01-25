@@ -54,13 +54,38 @@ const updateArticle = (req, res) => {
                 return res.status(200).json({ message: 'Article updated', article: updatedArticle });
             })
             .catch(error => {
-                return res.status(500).send(error.message);
+                return res.status(404).json({message: 'Article not found'});
+            }
             });
     }
 };
 
+const deleteArticle = (req, res) => {
+    if (req.method === 'POST') {
+        let id = req.params.id;
 
+        models.Article.findByPk(id) // Fetch the article before deleting
+            .then(article => {
+                if (!article) {
+                    return res.status(404).json({message: 'Article not found'});
+                }
+
+                return models.Article.destroy({
+                    where: {
+                        id: id
+                    }
+                });
+            })
+            .then(() => {
+                return res.status(200).json({message: 'Article deleted', article: {id}});
+            })
+            .catch(error => {
+                return res.status(500).send(error.message);
+            });
+    }
+};
 module.exports = {
-    createArticle
-    updateArticle
+    createArticle,
+    updateArticle,
+    deleteArticle
 }
